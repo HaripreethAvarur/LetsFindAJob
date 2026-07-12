@@ -1,0 +1,44 @@
+# ---------------------------------------------------------------------------
+# Polling cadence, backoff, freshness, and rate-limit settings.
+# Nothing here is hardcoded in Python — edit and re-run.
+# ---------------------------------------------------------------------------
+
+# How often each source is polled, in hours. Sources not listed fall back
+# to `default_interval_hours`.
+intervals_hours:
+  greenhouse: 2
+  lever: 2
+  ashby: 2
+  workday: 12
+  smartrecruiters: 12
+  wellfound: 24
+  internshala: 24
+default_interval_hours: 12
+
+# Weekly connector health check: verifies every configured board still
+# responds and that normalization yields at least one parseable record
+# (catches dead/renamed boards and schema drift).
+health_check_interval_hours: 168
+
+# Failure backoff. After N consecutive failures a source waits
+# base * 2^(N-1) minutes (capped) before it is eligible again, regardless
+# of its normal interval. State lives in the scheduler_state SQLite table.
+backoff:
+  base_minutes: 30
+  max_minutes: 1440
+
+# Freshness filter (days). Listings older than this (posted_date, or
+# first_seen_date when posted_date is unavailable) are flagged stale and
+# excluded from scoring. Tier is a property of each connector.
+freshness_days:
+  startup: 15   # greenhouse / lever / ashby / wellfound / internshala / careers_direct
+  mnc: 30       # workday / smartrecruiters
+
+# Politeness settings for outbound HTTP.
+rate_limit:
+  min_seconds_between_requests_per_host: 2.0
+  max_concurrent_requests: 8
+  request_timeout_seconds: 30
+  retries: 3
+  user_agent: "job-discovery-pipeline/1.0 (personal job search; contact via repo)"
+respect_robots_txt: true

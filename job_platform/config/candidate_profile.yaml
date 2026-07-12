@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+# Candidate profile + pipeline toggles.
+#
+# `summary` is the condensed profile embedded in the scorer's system prompt.
+# It is intentionally short — the full detailed context (metrics, project
+# pool, skills taxonomy) lives in templates/resume_tailor_prompt.txt and is
+# used only by the tailoring module on APPLY-verdict listings.
+# ---------------------------------------------------------------------------
+
+name: Gajulapalli Naga Vyshnavi
+location: Hyderabad, India
+
+summary: |
+  Gajulapalli Naga Vyshnavi. B.Tech Computer Science and Engineering, SRM
+  Institute of Science and Technology (Aug 2020-May 2024), GPA 9.24/10.
+  AI Research Engineer at Boltzmann Labs, Hyderabad, India (Aug 2024-present);
+  prior Deep Learning Research Intern there (Jan-Jul 2024). Core strengths:
+  multi-agent LLM orchestration, RAG pipelines (LangChain, LangGraph,
+  LlamaIndex), GNN-Transformer hybrid architectures, diffusion models,
+  production ML deployment (FastAPI, Docker, MongoDB, AWS, Kubernetes),
+  PPO-based RL, computer vision (segmentation, biometrics). 2 IEEE
+  publications (dental caries segmentation, gait recognition), 1 filed
+  Indian patent.
+
+# Years of professional experience (used by the verifier to judge
+# experience requirements; internship counted separately).
+years_experience: 2
+
+# --- Toggles ---------------------------------------------------------------
+
+# Generate a 150-200 word cover letter alongside each tailored resume.
+generate_cover_letter: true
+
+# Search official company pages for published recruiting contacts on
+# APPLY-verdict listings. Never infers email formats or touches social media.
+find_recruiter_contacts: false
+
+# Minimum relevance score for an APPLY verdict (all hard requirements must
+# also be met-or-partial).
+apply_score_threshold: 75
+
+# Run resume tailoring automatically on APPLY verdicts.
+auto_tailor_on_apply: true

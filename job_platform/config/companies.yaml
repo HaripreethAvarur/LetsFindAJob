@@ -1,0 +1,103 @@
+# ---------------------------------------------------------------------------
+# Target companies per connector. Add/remove entries here — no code changes.
+#
+# Each connector reads only its own section. The `company` field is the
+# display name used in reports; the platform-specific fields tell the
+# connector how to reach that company's board.
+#
+# `website` (optional, any section): official company site used by the
+# recruiter-contact finder. Only official pages are ever fetched.
+# ---------------------------------------------------------------------------
+
+greenhouse:
+  # slug = the {company} in boards-api.greenhouse.io/v1/boards/{company}/jobs
+  - company: Postman
+    slug: postman
+    website: https://www.postman.com
+  - company: Razorpay
+    slug: razorpaysoftwareprivatelimited
+    website: https://razorpay.com
+  - company: Groww
+    slug: groww
+    website: https://groww.in
+
+lever:
+  # slug = the {company} in api.lever.co/v0/postings/{company}
+  - company: Zeta
+    slug: zeta
+    website: https://www.zeta.tech
+  - company: CleverTap
+    slug: clevertap
+    website: https://clevertap.com
+
+ashby:
+  # slug = the job board name in api.ashbyhq.com/posting-api/job-board/{slug}
+  - company: Sarvam AI
+    slug: SarvamAI
+    website: https://www.sarvam.ai
+
+workday:
+  # Workday deployments vary per company. The common CXS pattern is:
+  #   https://{tenant}.{host}/wday/cxs/{tenant}/{site}/jobs   (POST)
+  # Fill tenant/host/site per company. If a company's deployment does not
+  # match this pattern, document it in KNOWN_LIMITATIONS.md and add a
+  # connector override (see README "Adding a new ATS / overriding Workday").
+  - company: NVIDIA
+    tenant: nvidia
+    host: wd5.myworkdayjobs.com
+    site: NVIDIAExternalCareerSite
+    search_text: ""            # optional keyword filter applied server-side
+    locations: []              # optional Workday location facet ids
+    website: https://www.nvidia.com
+  - company: Salesforce
+    tenant: salesforce
+    host: wd12.myworkdayjobs.com
+    site: External_Career_Site
+    search_text: "India"
+    website: https://www.salesforce.com
+
+smartrecruiters:
+  # identifier = the {company} in api.smartrecruiters.com/v1/companies/{company}/postings
+  - company: Bosch
+    identifier: BoschGroup
+    website: https://www.bosch.in
+
+careers_direct:
+  # Optional adapters for companies whose public career pages expose
+  # structured JSON. Only JSON endpoints are supported — no HTML scraping.
+  # `mapping` tells the connector where each field lives in the response
+  # (dot-paths into each job object; `jobs_path` locates the job array).
+  # Companies without a public JSON endpoint belong in KNOWN_LIMITATIONS.md.
+  []
+  # - company: ExampleCorp
+  #   url: https://example.com/api/careers.json
+  #   website: https://example.com
+  #   jobs_path: data.jobs
+  #   mapping:
+  #     id: id
+  #     title: title
+  #     location: location.name
+  #     department: team
+  #     url: absolute_url
+  #     posted_date: published_at
+  #     description: description_html
+
+wellfound:
+  # Wellfound has no public API and its robots.txt disallows automated
+  # access to job listings. The connector checks robots.txt at runtime and
+  # will skip (with a log line) while that remains true — see
+  # KNOWN_LIMITATIONS.md. Kept here so it activates automatically if
+  # Wellfound ever permits access or you obtain API access.
+  enabled: false
+  search_urls: []
+
+internshala:
+  # Internshala listing pages are server-rendered HTML. The connector
+  # respects robots.txt and parses listing cards; HTML drift may need an
+  # occasional selector fix (see KNOWN_LIMITATIONS.md).
+  enabled: true
+  categories:
+    - machine-learning-internship
+    - artificial-intelligence-ai-internship
+    - data-science-internship
+  location_filter: ""   # e.g. "work-from-home" or a city slug; empty = all India
