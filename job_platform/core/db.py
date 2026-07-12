@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS jobs_master (
     url             TEXT DEFAULT '',
     posted_date     TEXT,
     source_platform TEXT NOT NULL,
+    raw_description TEXT DEFAULT '',
     content_hash    TEXT NOT NULL,
     dedup_hash      TEXT NOT NULL,
     first_seen      TEXT NOT NULL,
@@ -110,14 +111,14 @@ def upsert_job(conn: sqlite3.Connection, rec: JobRecord) -> str:
         conn.execute(
             """INSERT INTO jobs_master
                (job_id, company, title, location, department, url, posted_date,
-                source_platform, content_hash, dedup_hash, first_seen, last_seen,
-                last_change, last_change_at, duplicate_of)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                source_platform, raw_description, content_hash, dedup_hash,
+                first_seen, last_seen, last_change, last_change_at, duplicate_of)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 rec.job_id, rec.company, rec.title, rec.location, rec.department,
                 rec.url, rec.posted_date.isoformat() if rec.posted_date else None,
-                rec.source_platform, rec.content_hash, rec.dedup_hash,
-                now, now, status, now, duplicate_of,
+                rec.source_platform, rec.raw_description, rec.content_hash,
+                rec.dedup_hash, now, now, status, now, duplicate_of,
             ),
         )
         conn.commit()
@@ -133,12 +134,12 @@ def upsert_job(conn: sqlite3.Connection, rec: JobRecord) -> str:
 
     conn.execute(
         """UPDATE jobs_master SET company=?, title=?, location=?, department=?, url=?,
-           posted_date=?, content_hash=?, dedup_hash=?, last_seen=?,
+           posted_date=?, raw_description=?, content_hash=?, dedup_hash=?, last_seen=?,
            last_change='changed', last_change_at=? WHERE job_id=?""",
         (
             rec.company, rec.title, rec.location, rec.department, rec.url,
             rec.posted_date.isoformat() if rec.posted_date else None,
-            rec.content_hash, rec.dedup_hash, now, now, rec.job_id,
+            rec.raw_description, rec.content_hash, rec.dedup_hash, now, now, rec.job_id,
         ),
     )
     conn.commit()

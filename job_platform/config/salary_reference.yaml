@@ -1,0 +1,29 @@
+# Static salary reference bands (INR lakhs per annum) for light-touch context.
+# Not live data — update occasionally by hand. Used only to flag
+# below/at/above market when a LISTING ITSELF states a range.
+# Matching is by keyword against the job title (first match wins).
+bands:
+  - keywords: ["principal", "staff"]
+    role: "Principal/Staff ML/AI Engineer"
+    min_lpa: 60
+    max_lpa: 120
+  - keywords: ["senior", "sr.", "lead"]
+    role: "Senior ML/AI Engineer (4-8 yoe)"
+    min_lpa: 30
+    max_lpa: 60
+  - keywords: ["research engineer", "applied scientist", "research scientist"]
+    role: "AI Research Engineer (1-4 yoe)"
+    min_lpa: 18
+    max_lpa: 45
+  - keywords: ["machine learning", "ml engineer", "ai engineer", "deep learning", "genai", "llm"]
+    role: "ML/AI Engineer (1-4 yoe)"
+    min_lpa: 15
+    max_lpa: 40
+  - keywords: ["data scientist"]
+    role: "Data Scientist (1-4 yoe)"
+    min_lpa: 12
+    max_lpa: 35
+  - keywords: ["intern"]
+    role: "Internship (monthly stipend, thousands INR)"
+    min_lpa: 0.2
+    max_lpa: 1.2
