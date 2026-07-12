@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import csv
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
 
 from .models import Evaluation, JobRecord
 
@@ -74,7 +73,7 @@ CREATE TABLE IF NOT EXISTS scheduler_state (
 
 
 def utcnow() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def connect(db_path: Path | str) -> sqlite3.Connection:
@@ -153,7 +152,7 @@ def mark_stale(conn: sqlite3.Connection, job_id: str, stale: bool) -> None:
     conn.commit()
 
 
-def get_job(conn: sqlite3.Connection, job_id: str) -> Optional[sqlite3.Row]:
+def get_job(conn: sqlite3.Connection, job_id: str) -> sqlite3.Row | None:
     return conn.execute("SELECT * FROM jobs_master WHERE job_id = ?", (job_id,)).fetchone()
 
 
@@ -162,7 +161,7 @@ def get_job(conn: sqlite3.Connection, job_id: str) -> Optional[sqlite3.Row]:
 
 def get_cached_evaluation(
     conn: sqlite3.Connection, job_id: str, content_hash: str
-) -> Optional[sqlite3.Row]:
+) -> sqlite3.Row | None:
     """Cache hit only when the stored evaluation matches the current content_hash."""
     return conn.execute(
         "SELECT * FROM ai_evaluations WHERE job_id = ? AND content_hash = ?",
@@ -224,8 +223,8 @@ def ensure_application_row(conn: sqlite3.Connection, job_id: str) -> None:
 def record_tailoring_outputs(
     conn: sqlite3.Connection,
     job_id: str,
-    resume_path: Optional[str],
-    cover_letter_path: Optional[str],
+    resume_path: str | None,
+    cover_letter_path: str | None,
 ) -> None:
     """Fills only the output-path columns; every manually-edited field is untouched."""
     ensure_application_row(conn, job_id)
@@ -242,7 +241,7 @@ def record_tailoring_outputs(
 
 def overdue_followups(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     """Applied rows whose follow_up_date has passed with no status change."""
-    today = datetime.now(timezone.utc).date().isoformat()
+    today = datetime.now(UTC).date().isoformat()
     return conn.execute(
         """SELECT a.*, j.company, j.title, j.url FROM application_status a
            JOIN jobs_master j USING (job_id)
@@ -264,9 +263,9 @@ def funnel_stats(conn: sqlite3.Connection) -> dict[str, int]:
 
 
 def source_due(
-    conn: sqlite3.Connection, source: str, interval_hours: float, now: Optional[datetime] = None
+    conn: sqlite3.Connection, source: str, interval_hours: float, now: datetime | None = None
 ) -> bool:
-    now = now or datetime.now(timezone.utc)
+    now = now or datetime.now(UTC)
     row = conn.execute(
         "SELECT * FROM scheduler_state WHERE source = ?", (source,)
     ).fetchone()
@@ -311,7 +310,7 @@ def record_failure(
     ).fetchone()
     count = (row["failure_count"] if row else 0) + 1
     backoff = min(base_minutes * (2 ** (count - 1)), max_minutes)
-    until = (datetime.now(timezone.utc) + timedelta(minutes=backoff)).isoformat(
+    until = (datetime.now(UTC) + timedelta(minutes=backoff)).isoformat(
         timespec="seconds"
     )
     conn.execute(

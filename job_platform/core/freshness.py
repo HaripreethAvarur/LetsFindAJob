@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import date, datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, date, datetime
+from typing import Any
 
 from . import db
 from .models import JobRecord
@@ -20,15 +20,15 @@ def is_fresh(
     rec: JobRecord,
     tier: str,
     scheduler_cfg: dict[str, Any],
-    first_seen: Optional[str] = None,
-    today: Optional[date] = None,
+    first_seen: str | None = None,
+    today: date | None = None,
 ) -> bool:
     """Fresh if posted_date (or first_seen when posted_date is missing) is
     within the tier's window."""
-    today = today or datetime.now(timezone.utc).date()
+    today = today or datetime.now(UTC).date()
     limit = max_age_days(tier, scheduler_cfg)
 
-    anchor: Optional[date] = rec.posted_date
+    anchor: date | None = rec.posted_date
     if anchor is None and first_seen:
         anchor = datetime.fromisoformat(first_seen).date()
     if anchor is None:

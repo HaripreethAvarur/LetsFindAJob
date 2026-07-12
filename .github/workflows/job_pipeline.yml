@@ -1,0 +1,102 @@
+# Always-on scheduler for the job pipeline. GitHub Actions is the recommended
+# runner: the 2-hour cadence needs something more reliable than a laptop.
+#
+# Setup (one time):
+#   1. Repo Settings -> Secrets and variables -> Actions -> New repository secret:
+#        ANTHROPIC_API_KEY   (or GEMINI_API_KEY + set LLM_PROVIDER below)
+#   2. Repo Settings -> Actions -> General -> Workflow permissions:
+#        "Read and write permissions" (the run commits the SQLite DB + reports
+#        back to a dedicated `pipeline-data` branch so state persists between runs).
+#   3. Add templates/base_resume.tex (your LaTeX resume) to enable tailoring.
+#
+# Cadence: the workflow fires every 2 hours; scheduler.yaml decides per-source
+# whether it is actually due (Workday/SmartRecruiters only every 12h, etc.),
+# so the frequent trigger stays cheap.
+
+name: job-pipeline
+
+on:
+  schedule:
+    - cron: "17 */2 * * *"   # every 2 hours (offset to avoid the top-of-hour rush)
+  workflow_dispatch: {}       # manual "run now" from the Actions tab
+
+concurrency:
+  group: job-pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: job_platform
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pipeline state (SQLite DB + outputs) lives on the pipeline-data
+      # branch so scheduled runs are incremental, not from scratch.
+      - name: Restore pipeline state
+        run: |
+          git fetch origin pipeline-data || true
+          if git rev-parse --verify origin/pipeline-data >/dev/null 2>&1; then
+            git checkout origin/pipeline-data -- job_platform/data job_platform/output 2>/dev/null || true
+          fi
+        working-directory: .
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: job_platform/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline
+        env:
+          LLM_PROVIDER: anthropic
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          MAX_SCORED_PER_RUN: "40"   # cost safety valve; raise once stable
+        run: python main.py
+
+      - name: Persist pipeline state
+        working-directory: .
+        run: |
+          git config user.name "job-pipeline-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B pipeline-data
+          git add -f job_platform/data/job_platform.db job_platform/output || true
+          if ! git diff --cached --quiet; then
+            git commit -m "pipeline run $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push -f origin pipeline-data
+          fi
+
+  weekly-health-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    needs: run
+    # Health check runs inside the normal pipeline when --weekly is passed;
+    # this job triggers it once a week (Sunday ~03:17 UTC slot of the 2h cron).
+    steps:
+      - name: Gate to Sundays 02:00-04:00 UTC
+        id: gate
+        run: |
+          if [ "$(date -u +%u%H)" -ge 702 ] && [ "$(date -u +%u%H)" -le 704 ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.go == 'true'
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.go == 'true'
+        with:
+          python-version: "3.12"
+      - name: Weekly health check
+        if: steps.gate.outputs.go == 'true'
+        working-directory: job_platform
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          pip install -r requirements.txt
+          python main.py --weekly --skip-llm

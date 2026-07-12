@@ -1,0 +1,20 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+
+# Pipeline state & outputs (the GitHub Actions workflow force-adds the DB and
+# reports to its own `pipeline-data` branch; keep them off code branches)
+job_platform/data/
+job_platform/output/
+job_platform/run_log.txt
+
+# Local scratch
+*.log

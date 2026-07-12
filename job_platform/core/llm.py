@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 from .config import env
 
@@ -64,7 +64,7 @@ class AnthropicProvider:
 
     name = "anthropic"
 
-    def __init__(self, model: Optional[str] = None) -> None:
+    def __init__(self, model: str | None = None) -> None:
         import anthropic
 
         self.client = anthropic.Anthropic()
@@ -113,7 +113,7 @@ class AnthropicProvider:
 class GeminiProvider:
     name = "gemini"
 
-    def __init__(self, model: Optional[str] = None) -> None:
+    def __init__(self, model: str | None = None) -> None:
         from google import genai
 
         self.client = genai.Client(api_key=env("GEMINI_API_KEY"))

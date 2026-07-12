@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import hashlib
 import re
-from datetime import date, datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, date, datetime
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -33,7 +33,7 @@ class JobRecord(BaseModel):
     location: str = ""
     department: str = ""
     url: str = ""
-    posted_date: Optional[date] = None
+    posted_date: date | None = None
     source_platform: str
     raw_description: str = ""
     content_hash: str = ""
@@ -75,7 +75,7 @@ class RawFetch(BaseModel):
     company_config: dict[str, Any] = Field(default_factory=dict)
     url: str
     payload: Any  # parsed JSON (dict/list) or raw text for HTML sources
-    fetched_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    fetched_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class Evaluation(BaseModel):

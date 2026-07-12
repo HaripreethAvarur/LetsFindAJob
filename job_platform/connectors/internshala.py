@@ -9,7 +9,6 @@ may occasionally require a selector fix — see KNOWN_LIMITATIONS.md.
 from __future__ import annotations
 
 import logging
-import re
 from typing import Any
 
 from bs4 import BeautifulSoup

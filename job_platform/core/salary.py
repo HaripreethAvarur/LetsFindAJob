@@ -7,7 +7,7 @@ configured market band for the role.
 from __future__ import annotations
 
 import re
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -28,7 +28,7 @@ def _load_bands() -> list[dict[str, Any]]:
         return (yaml.safe_load(f) or {}).get("bands", [])
 
 
-def parse_stated_range(text: str) -> Optional[tuple[float, float]]:
+def parse_stated_range(text: str) -> tuple[float, float] | None:
     """Extract a stated INR range in LPA from a description, if any."""
     m = _LPA_RE.search(text or "")
     if m:
@@ -40,7 +40,7 @@ def parse_stated_range(text: str) -> Optional[tuple[float, float]]:
     return None
 
 
-def salary_context(title: str, description: str) -> Optional[str]:
+def salary_context(title: str, description: str) -> str | None:
     """Returns e.g. '18-25 LPA stated — at market for ML/AI Engineer (15-40)'
     or None when the listing states no range."""
     stated = parse_stated_range(description)

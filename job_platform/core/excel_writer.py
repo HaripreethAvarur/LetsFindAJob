@@ -8,8 +8,9 @@ no data loss. Manual tracking edits belong in the application_status table
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -80,7 +81,7 @@ def write_tracker(
     conn: sqlite3.Connection,
     out_path: Path,
     run_started_iso: str,
-    run_summary: Optional[dict[str, Any]] = None,
+    run_summary: dict[str, Any] | None = None,
 ) -> Path:
     wb = Workbook()
 

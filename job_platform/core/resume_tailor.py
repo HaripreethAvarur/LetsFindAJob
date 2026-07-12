@@ -11,7 +11,7 @@ import logging
 import re
 import sqlite3
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from . import db
 from .config import OUTPUT_DIR, TEMPLATES_DIR
@@ -31,14 +31,14 @@ def _safe_name(company: str, title: str) -> str:
     return re.sub(r"[^\w\-]+", "_", raw).strip("_")[:120]
 
 
-def _extract_latex(response: str) -> Optional[str]:
+def _extract_latex(response: str) -> str | None:
     """The final LaTeX resume is the last fenced block containing \\documentclass."""
     blocks = re.findall(r"```(?:latex|tex)?\s*\n(.*?)```", response, re.DOTALL)
     latex_blocks = [b for b in blocks if "\\documentclass" in b]
     return latex_blocks[-1].strip() if latex_blocks else None
 
 
-def _extract_cover_letter(response: str) -> Optional[str]:
+def _extract_cover_letter(response: str) -> str | None:
     """Cover letter is emitted as plain text after a 'Cover Letter' heading,
     outside the LaTeX block."""
     without_code = re.sub(r"```.*?```", "", response, flags=re.DOTALL)
@@ -53,7 +53,7 @@ def _extract_cover_letter(response: str) -> Optional[str]:
     return text or None
 
 
-def _extract_ats_scores(response: str) -> tuple[Optional[str], Optional[str]]:
+def _extract_ats_scores(response: str) -> tuple[str | None, str | None]:
     before = re.search(r"current ats score[^0-9]{0,20}(\d{1,3})\s*%?", response, re.IGNORECASE)
     after = re.search(r"new ats score[^0-9]{0,20}(\d{1,3})\s*%?", response, re.IGNORECASE)
     return (before.group(1) if before else None, after.group(1) if after else None)
@@ -64,7 +64,7 @@ class ResumeTailor:
         self.provider = provider
         self.generate_cover_letter = generate_cover_letter
 
-    def _build_prompt(self, jd_text: str) -> Optional[str]:
+    def _build_prompt(self, jd_text: str) -> str | None:
         if not PROMPT_PATH.exists():
             log.error("missing %s — tailoring skipped", PROMPT_PATH)
             return None
@@ -85,7 +85,7 @@ class ResumeTailor:
 
     def tailor(
         self, conn: sqlite3.Connection, rec: JobRecord
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Run one tailoring call and write outputs. Returns a summary dict or
         None when skipped/failed (never raises — one bad listing must not
         stop the run)."""
@@ -111,7 +111,7 @@ class ResumeTailor:
         cl_dir.mkdir(parents=True, exist_ok=True)
 
         latex = _extract_latex(response)
-        resume_path: Optional[Path] = None
+        resume_path: Path | None = None
         if latex:
             resume_path = resume_dir / f"{name}.tex"
             resume_path.write_text(latex, encoding="utf-8")
@@ -124,7 +124,7 @@ class ResumeTailor:
         changelog_path = resume_dir / f"{name}_changelog.md"
         changelog_path.write_text(response, encoding="utf-8")
 
-        cover_path: Optional[Path] = None
+        cover_path: Path | None = None
         if self.generate_cover_letter:
             cover = _extract_cover_letter(response)
             if cover:

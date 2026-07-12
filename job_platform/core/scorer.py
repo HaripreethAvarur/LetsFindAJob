@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import Any, Optional
+from typing import Any
 
 from . import db
 from .llm import LLMError, LLMProvider
@@ -159,7 +159,7 @@ class Scorer:
             reasoning=str(pass2.get("reasoning", "")),
         )
 
-    def score_cached(self, conn: sqlite3.Connection, rec: JobRecord) -> Optional[Evaluation]:
+    def score_cached(self, conn: sqlite3.Connection, rec: JobRecord) -> Evaluation | None:
         """Score with cache: returns cached Evaluation when content is unchanged,
         otherwise runs both passes and persists. Returns None on LLM failure
         (logged; the pipeline continues)."""

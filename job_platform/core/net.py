@@ -9,7 +9,7 @@ import asyncio
 import logging
 import time
 import urllib.robotparser
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urlsplit
 
 import httpx
@@ -54,7 +54,7 @@ class HttpClient:
         self.user_agent = rate_cfg.get("user_agent", "job-discovery-pipeline/1.0")
         self.respect_robots = respect_robots
         self._gates: dict[str, _HostGate] = {}
-        self._robots: dict[str, Optional[urllib.robotparser.RobotFileParser]] = {}
+        self._robots: dict[str, urllib.robotparser.RobotFileParser | None] = {}
         self._semaphore = asyncio.Semaphore(int(rate_cfg.get("max_concurrent_requests", 8)))
         self._client = httpx.AsyncClient(
             timeout=self.timeout,
@@ -76,7 +76,7 @@ class HttpClient:
         host = urlsplit(url).netloc
         if host not in self._robots:
             robots_url = f"https://{host}/robots.txt"
-            parser: Optional[urllib.robotparser.RobotFileParser] = None
+            parser: urllib.robotparser.RobotFileParser | None = None
             try:
                 resp = await self._client.get(robots_url)
                 if resp.status_code == 200 and resp.text.strip():
@@ -96,7 +96,7 @@ class HttpClient:
         url: str,
         *,
         json_body: Any = None,
-        params: Optional[dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
         check_robots: bool = True,
     ) -> httpx.Response:
         if check_robots and not await self._robots_allows(url):
@@ -119,7 +119,7 @@ class HttpClient:
 
         return await _do()
 
-    async def get_json(self, url: str, params: Optional[dict[str, Any]] = None) -> Any:
+    async def get_json(self, url: str, params: dict[str, Any] | None = None) -> Any:
         resp = await self.request("GET", url, params=params)
         resp.raise_for_status()
         return resp.json()
@@ -129,7 +129,7 @@ class HttpClient:
         resp.raise_for_status()
         return resp.json()
 
-    async def get_text(self, url: str, params: Optional[dict[str, Any]] = None) -> str:
+    async def get_text(self, url: str, params: dict[str, Any] | None = None) -> str:
         resp = await self.request("GET", url, params=params)
         resp.raise_for_status()
         return resp.text

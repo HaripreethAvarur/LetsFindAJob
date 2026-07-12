@@ -23,7 +23,7 @@ load_dotenv(BASE_DIR / ".env")
 def _load_yaml(path: Path) -> Any:
     if not path.exists():
         return {}
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
 

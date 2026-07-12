@@ -3,7 +3,7 @@ score, follow-ups needed, salary context for APPLY listings."""
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from . import db
@@ -14,7 +14,7 @@ def build_digest(
     conn: sqlite3.Connection, run_started_iso: str, run_summary: dict[str, Any]
 ) -> str:
     lines: list[str] = []
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     lines.append(f"JOB PIPELINE DIGEST — {now}")
     lines.append("=" * 60)
 

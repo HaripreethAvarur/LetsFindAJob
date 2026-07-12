@@ -9,15 +9,15 @@ from __future__ import annotations
 import logging
 import re
 from abc import ABC, abstractmethod
-from datetime import date, datetime, timedelta, timezone
-from typing import Any, ClassVar, Optional
+from datetime import UTC, date, datetime, timedelta
+from typing import Any, ClassVar
 
 from core.models import JobRecord, RawFetch
 from core.net import HttpClient
 
 log = logging.getLogger("connectors")
 
-_REGISTRY: dict[str, type["BaseConnector"]] = {}
+_REGISTRY: dict[str, type[BaseConnector]] = {}
 
 
 class BaseConnector(ABC):
@@ -59,7 +59,7 @@ def registry() -> dict[str, type[BaseConnector]]:
 _RELATIVE_RE = re.compile(r"posted\s+(\d+)\+?\s+day", re.IGNORECASE)
 
 
-def parse_date(value: Any) -> Optional[date]:
+def parse_date(value: Any) -> date | None:
     """Best-effort date parsing across the formats the sources emit:
     ISO strings, epoch millis/seconds, and Workday-style relative text."""
     if value is None or value == "":
@@ -69,7 +69,7 @@ def parse_date(value: Any) -> Optional[date]:
         if ts > 1e12:  # epoch millis
             ts /= 1000.0
         try:
-            return datetime.fromtimestamp(ts, tz=timezone.utc).date()
+            return datetime.fromtimestamp(ts, tz=UTC).date()
         except (OverflowError, OSError, ValueError):
             return None
     text = str(value).strip()
@@ -85,7 +85,7 @@ def parse_date(value: Any) -> Optional[date]:
         pass
     # Relative text ("Posted Today", "Posted 3 Days Ago", "Posted 30+ Days Ago")
     lower = text.lower()
-    today = datetime.now(timezone.utc).date()
+    today = datetime.now(UTC).date()
     if "today" in lower:
         return today
     if "yesterday" in lower:

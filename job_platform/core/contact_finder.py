@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urlsplit
 
 from .net import HttpClient, RobotsDisallowed
@@ -32,7 +32,7 @@ _RECRUITING_EMAIL_RE = re.compile(
 
 
 async def find_contact(
-    http: HttpClient, company: str, website: Optional[str]
+    http: HttpClient, company: str, website: str | None
 ) -> tuple[str, str]:
     """Returns (recruiter_contact, contact_source)."""
     if not website:
@@ -60,7 +60,7 @@ async def find_contact(
     return NOT_AVAILABLE, f"searched official pages under {base}"
 
 
-def website_for(company_name: str, companies_cfg: dict[str, Any]) -> Optional[str]:
+def website_for(company_name: str, companies_cfg: dict[str, Any]) -> str | None:
     """Look up the configured official website for a company across sections."""
     for section in companies_cfg.values():
         if not isinstance(section, list):

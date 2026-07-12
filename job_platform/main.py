@@ -21,7 +21,7 @@ import asyncio
 import json
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from connectors import discover
@@ -198,7 +198,7 @@ async def run_pipeline(args: argparse.Namespace) -> None:
             for name in sources
         )
     )
-    for name, results in zip(sources, gathered):
+    for name, results in zip(sources, gathered, strict=True):
         counters["records_per_source"][name] = len(results)
         to_score.extend(r.record for r in results)
 
@@ -304,7 +304,7 @@ def run_daemon(args: argparse.Namespace) -> None:
         tick_args.daemon = False
         asyncio.run(run_pipeline(tick_args))
 
-    sched.add_job(tick, "interval", hours=tick_hours, next_run_time=datetime.now(timezone.utc))
+    sched.add_job(tick, "interval", hours=tick_hours, next_run_time=datetime.now(UTC))
     log.info("daemon started — checking due sources every %.1fh (Ctrl+C to stop)", tick_hours)
     sched.start()
 
