@@ -24,12 +24,15 @@ class DedupResult:
 def process_record(conn: sqlite3.Connection, rec: JobRecord) -> DedupResult:
     """Store the record and decide whether it needs (re)scoring.
 
-    - unchanged: skip entirely (this is the common case at high polling freq)
     - duplicate: stored + linked to the canonical posting, never scored
-    - new/changed: scored unless a cached evaluation matches the content_hash
+    - anything else: scored only when no cached evaluation matches the
+      current content_hash. An unchanged-and-already-scored posting is the
+      common case at high polling frequency and costs zero LLM calls, but an
+      unchanged posting that was never scored (e.g. fetched while the API
+      key was missing or quota was exhausted) stays pending until scored.
     """
     status = db.upsert_job(conn, rec)
-    if status in ("unchanged", "duplicate"):
+    if status == "duplicate":
         return DedupResult(rec, status, needs_scoring=False)
 
     cached = db.get_cached_evaluation(conn, rec.job_id, rec.content_hash)

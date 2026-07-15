@@ -82,7 +82,9 @@ jobs:
           # default for a free-key-only setup. Override via repo variable.
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
           MAX_SCORED_PER_RUN: "40"   # cost safety valve; raise once stable
-        run: python main.py
+        # Manual "Run workflow" clicks force-run every source; scheduled
+        # firings stay incremental (only sources that are due).
+        run: python main.py ${{ github.event_name == 'workflow_dispatch' && '--run-now' || '' }}
 
       - name: Persist pipeline state
         working-directory: .

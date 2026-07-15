@@ -22,8 +22,10 @@ def test_new_then_unchanged_then_changed(tmp_path):
     first = process_record(conn, make_record())
     assert first.status == "new" and first.needs_scoring
 
+    # Unchanged but never successfully scored (e.g. API key was missing on
+    # the first run): stays pending so the backlog drains on later runs.
     again = process_record(conn, make_record())
-    assert again.status == "unchanged" and not again.needs_scoring
+    assert again.status == "unchanged" and again.needs_scoring
 
     edited = process_record(conn, make_record(raw_description="Build agents."))
     assert edited.status == "changed" and edited.needs_scoring
