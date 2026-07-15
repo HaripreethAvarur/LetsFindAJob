@@ -1,0 +1,155 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{ulem}
+\usepackage{multicol}
+\usepackage{parcolumns}
+\input{glyphtounicode}
+\usepackage{indentfirst}
+\usepackage{ragged2e}
+\usepackage[top=0.5in, bottom=0.5in, left=0.5in, right=0.5in]{geometry}
+\usepackage{needspace}
+\usepackage{newtxtext}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\urlstyle{same}
+
+\raggedbottom
+\setlength{\tabcolsep}{0in}
+
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+\pdfgentounicode=1
+
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      {#1} & #2 \\
+      {#3} & {#4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+\begin{document}
+
+\begin{center}
+    {\fontsize{16pt}{16pt}\selectfont \textbf{Gajulapalli Naga Vyshnavi}}
+\end{center}
+\begin{center}
+    \vspace{-5pt}
+    (+91) 9346901074 \textbar\, \href{mailto:nvyshnavi36@gmail.com}{nvyshnavi36@gmail.com} \textbar\,
+    \href{https://www.linkedin.com/in/gajulapalli-naga-vyshnavi-646931242/}{linkedin.com/in/gajulapalli-naga-vyshnavi} \textbar\,
+    \href{https://github.com/GajulapalliNagaVyshnavi}{github.com/GajulapalliNagaVyshnavi}
+\end{center}
+
+\vspace{-10pt}
+
+\section{\textbf{PROFESSIONAL EXPERIENCE}}
+\vspace{0pt}
+
+\noindent\textbf{Boltzmann Labs} \hfill \textbf{Hyderabad, India} \\
+\textbf{AI Research Engineer} \hfill \textbf{Aug 2024--Present}
+\begin{itemize}
+    \vspace{-5pt}
+    \item Architected a multi-agent LLM orchestration system with dynamic tool-use and RAG-based retrieval pipelines, compressing end-to-end research workflows from 3 months to 3 days across automated case study generation and client reporting. \vspace{-7pt}
+    \item Fine-tuned a generative diffusion model on domain-specific scientific sequence datasets, optimizing for fidelity, sequence recovery, and downstream task success; outperformed existing diffusion baselines on held-out evaluations. \vspace{-7pt}
+    \item Developed and deployed 30+ ML/DL models for multi-class property prediction, classification, and regression tasks; integrated production inference pipelines supporting enterprise client workflows. \vspace{-7pt}
+    \item Engineered hybrid GNN-Transformer architectures fusing graph topology with sequence embeddings; outperformed standalone GNN and Transformer baselines by 5\% on structured prediction benchmarks. \vspace{-7pt}
+    \item Built automated metric-driven evaluation pipelines with iterative convergence scoring, reducing ML validation cycles by 25\% across research and enterprise workflows. \vspace{-7pt}
+    \item Applied PPO-based reinforcement learning with reward shaping for discrete sequence optimization; doubled convergence speed and achieved 90\% target-binding prediction accuracy. \vspace{-7pt}
+\end{itemize}
+
+\vspace{3pt}
+\noindent\textbf{Deep Learning Research Intern} \hfill \textbf{Jan 2024--Jul 2024}
+\begin{itemize}
+    \vspace{-5pt}
+    \item Developed multimodal autoencoder architectures fusing 4 heterogeneous biological data modalities via shared latent representations; improved target identification accuracy by 3\% over single-modality baselines. \vspace{-7pt}
+    \item Built LangGraph-based RAG agent workflows for multi-stage research pipelines including structured data extraction, analytical summarization, and automated report generation across 10+ task types. \vspace{-7pt}
+    \item Deployed FastAPI endpoints for real-time inference; engineered asynchronous batch pipelines for high-throughput workloads (Docker, MongoDB, AWS), achieving 8x latency reduction and 30\% compute cost savings. \vspace{-7pt}
+\end{itemize}
+
+\vspace{-1pt}
+
+\section{\textbf{TECHNICAL SKILLS}}
+\vspace{0pt}
+
+\noindent\textbf{Programming Languages:} Python, C++, SQL, Bash/Shell Scripting \\
+\textbf{Core AI/ML Competencies:} Generative AI, LLM Orchestration, Multi-Agent Systems, Retrieval Augmented Generation, Prompt Engineering, Fine-Tuning, RLHF, Transformers, Diffusion Models, GNNs, CNNs, RNNs, LSTMs, Autoencoders, Contrastive Learning, Self-Supervised Learning, Computer Vision, NLP, Multimodal Learning, Reinforcement Learning, Bayesian Methods, Vector Search, Model Optimization, Feature Engineering, Ensemble Methods, Time Series Forecasting, Statistical Modeling \\
+\textbf{Technical Tools \& Frameworks:} PyTorch, TensorFlow, Keras, Hugging Face, LangChain, LangGraph, LlamaIndex, OpenCV, Scikit-Learn, Pandas, NumPy, Matplotlib, Seaborn, FastAPI, MongoDB, Docker, AWS, Git, Qiskit
+
+\vspace{-1pt}
+
+\section{\textbf{PROJECTS EXPERIENCE}}
+\vspace{0pt}
+
+\noindent\textbf{Medical Image Segmentation (Computer Vision \& Deep Learning)} \hfill \textbf{Jul 2023--Sep 2024} \\
+\begin{itemize}
+    \vspace{-18pt}
+    \item Curated a production-quality dataset of 1,130 X-ray images; developed custom OpenCV preprocessing pipelines (contrast normalization, filtering) to generate high-fidelity ground truth annotations. \vspace{-7pt}
+    \item Engineered a custom Residual Attention U-Net with specialized attention modules and optimized loss functions, achieving a 15\% improvement in IoU and an 11.5\% gain in Dice coefficient over baseline segmentation models. \vspace{-7pt}
+\end{itemize}
+
+\vspace{3pt}
+\noindent\textbf{Human Gait Recognition (Computer Vision \& Biometric ML)} \hfill \textbf{Oct 2022--Feb 2023} \\
+\begin{itemize}
+    \vspace{-18pt}
+    \item Created a proprietary gait dataset utilizing custom OpenCV preprocessing, augmentation, and biometric feature extraction pipelines for robust cross-view motion analysis. \vspace{-7pt}
+    \item Developed an ML/DL benchmarking framework comparing traditional classifiers and CNNs (InceptionNet, MobileNetV2); fine-tuned MobileNetV2 to achieve 98.75\% classification accuracy. \vspace{-7pt}
+\end{itemize}
+
+\vspace{-1pt}
+
+\section{\textbf{PATENT AND PUBLICATIONS}}
+\vspace{0pt}
+\noindent\textbf{Patent:}\\
+\begin{itemize}
+    \vspace{-15pt}
+    \item System and Method for Automated Image-Based Detection, Indian Patent App. No. 202441094787 (filed, under examination) \\ -- an attention-enhanced U-Net with metaheuristic optimization for automated detection in noisy, real-world X-ray environments. \vspace{-11pt}
+\end{itemize}
+\noindent\textbf{Publications:}\\
+\begin{itemize}
+    \vspace{-15pt}
+    \item \textbf{G. Naga Vyshnavi}, et al., ``SRMDent: Dental Caries Segmentation using Residual Attention U-Net for Orthopantomogram Images,'' \textit{IEEE ICIETDW} 2024. DOI: \href{https://doi.org/10.1109/ICIETDW61607.2024.10941364}{10.1109/ICIETDW61607.2024.10941364} \vspace{-7pt}
+    \item \textbf{G. Naga Vyshnavi}, et al., ``Human Gait Recognition Using a Cross-View Micro Gait Dataset with Lightweight MobileNet,'' \textit{IEEE RAEEUCCI} 2023. DOI: \href{https://doi.org/10.1109/RAEEUCCI57140.2023.10134510}{10.1109/RAEEUCCI57140.2023.10134510} \vspace{-7pt}
+\end{itemize}
+
+\vspace{-1pt}
+
+\section{\textbf{EDUCATION}}
+\vspace{0pt}
+
+\noindent\textbf{SRM Institute of Science and Technology}, Kattankulathur, India \hfill \textbf{Aug 2020--May 2024} \\
+Bachelor of Technology in Computer Science and Engineering \hfill \textbf{GPA: 9.24/10.0} \\
+
+\end{document}
