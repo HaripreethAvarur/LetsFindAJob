@@ -207,13 +207,27 @@ async def run_pipeline(args: argparse.Namespace) -> None:
 
     # --- LLM scoring (two-pass, cached) -------------------------------------
     tailored_summaries: list[dict[str, Any]] = []
+    provider = None
     if not args.skip_llm and to_score:
-        from core.contact_finder import find_contact, website_for
         from core.llm import get_provider
+
+        try:
+            provider = get_provider()
+        except Exception as exc:
+            # Missing/invalid API key must not fail the whole run: listings
+            # are still collected, deduped, and reported. They stay pending
+            # and will be scored on the first run after the key is set.
+            counters["llm_unavailable"] = str(exc)
+            log.error(
+                "LLM provider unavailable — %d listings collected but NOT scored "
+                "(they remain pending and will be scored once the key is set): %s",
+                len(to_score), exc,
+            )
+    if provider is not None and to_score:
+        from core.contact_finder import find_contact, website_for
         from core.resume_tailor import ResumeTailor
         from core.scorer import Scorer
 
-        provider = get_provider()
         scorer = Scorer(
             provider,
             profile_summary=profile_cfg.get("summary", ""),
@@ -258,7 +272,7 @@ async def run_pipeline(args: argparse.Namespace) -> None:
                     http, rec.company, website_for(rec.company, companies_cfg)
                 )
                 db.save_recruiter_contact(conn, rec.job_id, contact, source)
-    elif args.skip_llm:
+    if args.skip_llm and to_score:
         log.info("--skip-llm: %d listings left unscored", len(to_score))
 
     await http.close()
@@ -276,6 +290,8 @@ async def run_pipeline(args: argparse.Namespace) -> None:
         "resumes_tailored": counters["tailored"],
         "health_warnings": ", ".join(counters["health_warnings"]) or "(none)",
     }
+    if counters.get("llm_unavailable"):
+        run_summary["ACTION NEEDED"] = f"LLM key missing/invalid: {counters['llm_unavailable']}"
     db.export_csvs(conn, config.OUTPUT_DIR)
     write_tracker(conn, config.OUTPUT_DIR / "job_tracker.xlsx", run_started, run_summary)
     digest_text = build_digest(conn, run_started, run_summary)

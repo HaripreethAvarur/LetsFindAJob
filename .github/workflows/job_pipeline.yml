@@ -24,6 +24,12 @@ concurrency:
   group: job-pipeline
   cancel-in-progress: false
 
+# Grants the workflow's token write access to repo contents so the
+# "Persist pipeline state" step can push the pipeline-data branch —
+# no repository-settings change needed.
+permissions:
+  contents: write
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -33,6 +39,15 @@ jobs:
         working-directory: job_platform
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check LLM secret is configured
+        working-directory: .
+        env:
+          KEY_SET: ${{ secrets.ANTHROPIC_API_KEY != '' || secrets.GEMINI_API_KEY != '' }}
+        run: |
+          if [ "$KEY_SET" != "true" ]; then
+            echo "::warning::No ANTHROPIC_API_KEY / GEMINI_API_KEY secret is set — listings will be collected but NOT scored. Add the secret in Settings → Secrets and variables → Actions."
+          fi
 
       # Pipeline state (SQLite DB + outputs) lives on the pipeline-data
       # branch so scheduled runs are incremental, not from scratch.

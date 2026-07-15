@@ -67,6 +67,13 @@ class AnthropicProvider:
     def __init__(self, model: str | None = None) -> None:
         import anthropic
 
+        # Fail fast with a clear message instead of erroring (and retrying)
+        # on every single listing at request time.
+        if not (env("ANTHROPIC_API_KEY") or env("ANTHROPIC_AUTH_TOKEN")):
+            raise LLMError(
+                "ANTHROPIC_API_KEY is not set (add it to .env locally, or as a "
+                "GitHub Actions repository secret)"
+            )
         self.client = anthropic.Anthropic()
         self.model = model or env("ANTHROPIC_MODEL", "claude-opus-4-8")
 
@@ -116,6 +123,11 @@ class GeminiProvider:
     def __init__(self, model: str | None = None) -> None:
         from google import genai
 
+        if not env("GEMINI_API_KEY"):
+            raise LLMError(
+                "GEMINI_API_KEY is not set (add it to .env locally, or as a "
+                "GitHub Actions repository secret)"
+            )
         self.client = genai.Client(api_key=env("GEMINI_API_KEY"))
         self.model = model or env("GEMINI_MODEL", "gemini-2.5-pro")
 
