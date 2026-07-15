@@ -118,3 +118,56 @@ def test_json_extraction_rejects_garbage():
 def test_schemas_declare_required_keys():
     assert set(PASS1_SCHEMA["required"]) == {"hard_requirements", "soft_requirements"}
     assert "verdict" in PASS2_SCHEMA["required"]
+
+
+def test_fallback_provider_switches_on_primary_failure():
+    from core.llm import FallbackProvider, LLMError
+
+    class Dead:
+        name = "dead"
+
+        def complete_json(self, *a, **k):
+            raise LLMError("rate limited")
+
+        def complete_text(self, *a, **k):
+            raise LLMError("rate limited")
+
+    class Alive:
+        name = "alive"
+
+        def complete_json(self, system, user, schema):
+            return {"ok": True}
+
+        def complete_text(self, system, user, max_tokens=16000):
+            return "text"
+
+    fb = FallbackProvider(Dead(), Alive())
+    assert fb.complete_json("s", "u", {"required": []}) == {"ok": True}
+    assert fb.complete_text("s", "u") == "text"
+
+
+def test_get_provider_uses_whichever_key_exists(monkeypatch):
+    from core import llm
+
+    try:  # noqa: SIM105 — some sandboxes have a broken google-genai install
+        from google import genai  # noqa: F401
+    except BaseException:  # pyo3 panics are BaseException, not ImportError
+        pytest.skip("google-genai not importable in this environment")
+
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
+    monkeypatch.setenv("GEMINI_API_KEY", "fake-key")
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")  # preferred but unconfigured
+    provider = llm.get_provider()
+    assert provider.name == "gemini"  # falls through to the configured one
+
+
+def test_get_provider_errors_when_no_keys(monkeypatch):
+    import pytest as _pytest
+
+    from core import llm
+
+    for var in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "GEMINI_API_KEY"):
+        monkeypatch.delenv(var, raising=False)
+    with _pytest.raises(llm.LLMError):
+        llm.get_provider()

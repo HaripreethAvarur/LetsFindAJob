@@ -70,7 +70,12 @@ jobs:
 
       - name: Run pipeline
         env:
-          LLM_PROVIDER: anthropic
+          # Primary provider; the other key (if set) is the automatic backup.
+          # gemini-first keeps bulk scoring on Gemini's free tier and saves
+          # Anthropic credits for failover. Override with a repository
+          # variable named LLM_PROVIDER (Settings → Secrets and variables →
+          # Actions → Variables tab).
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           MAX_SCORED_PER_RUN: "40"   # cost safety valve; raise once stable

@@ -65,8 +65,6 @@ class AnthropicProvider:
     name = "anthropic"
 
     def __init__(self, model: str | None = None) -> None:
-        import anthropic
-
         # Fail fast with a clear message instead of erroring (and retrying)
         # on every single listing at request time.
         if not (env("ANTHROPIC_API_KEY") or env("ANTHROPIC_AUTH_TOKEN")):
@@ -74,6 +72,10 @@ class AnthropicProvider:
                 "ANTHROPIC_API_KEY is not set (add it to .env locally, or as a "
                 "GitHub Actions repository secret)"
             )
+        try:
+            import anthropic
+        except Exception as exc:  # broken install must not crash the pipeline
+            raise LLMError(f"anthropic package unavailable: {exc}") from exc
         self.client = anthropic.Anthropic()
         self.model = model or env("ANTHROPIC_MODEL", "claude-opus-4-8")
 
@@ -121,13 +123,15 @@ class GeminiProvider:
     name = "gemini"
 
     def __init__(self, model: str | None = None) -> None:
-        from google import genai
-
         if not env("GEMINI_API_KEY"):
             raise LLMError(
                 "GEMINI_API_KEY is not set (add it to .env locally, or as a "
                 "GitHub Actions repository secret)"
             )
+        try:
+            from google import genai
+        except Exception as exc:  # broken install must not crash the pipeline
+            raise LLMError(f"google-genai package unavailable: {exc}") from exc
         self.client = genai.Client(api_key=env("GEMINI_API_KEY"))
         self.model = model or env("GEMINI_MODEL", "gemini-2.5-pro")
 
@@ -164,8 +168,69 @@ class GeminiProvider:
         return self._generate(system, user, json_mode=False)
 
 
+class FallbackProvider:
+    """Primary provider with automatic failover to a backup.
+
+    When the primary exhausts its own retries (rate limit, quota, outage),
+    the same request is retried once on the backup. There is no debate/
+    consensus mode by design: the two-pass scorer plus the in-code APPLY
+    gate already provide the review structure, and a second opinion per
+    listing would double LLM spend for marginal gain.
+    """
+
+    def __init__(self, primary: LLMProvider, backup: LLMProvider) -> None:
+        self.primary = primary
+        self.backup = backup
+        self.name = f"{primary.name}->{backup.name}"
+
+    def _call(self, method: str, *args: Any, **kwargs: Any) -> Any:
+        try:
+            return getattr(self.primary, method)(*args, **kwargs)
+        except Exception as exc:
+            log.warning(
+                "primary provider %s failed (%s) — falling back to %s",
+                self.primary.name, exc, self.backup.name,
+            )
+            return getattr(self.backup, method)(*args, **kwargs)
+
+    def complete_json(self, system: str, user: str, schema: dict[str, Any]) -> dict[str, Any]:
+        return self._call("complete_json", system, user, schema)
+
+    def complete_text(self, system: str, user: str, max_tokens: int = 16000) -> str:
+        return self._call("complete_text", system, user, max_tokens=max_tokens)
+
+
 def get_provider() -> LLMProvider:
-    provider = env("LLM_PROVIDER", "anthropic").lower()
-    if provider == "gemini":
-        return GeminiProvider()
-    return AnthropicProvider()
+    """Build the provider chain from whichever API keys are configured.
+
+    LLM_PROVIDER picks the primary ("anthropic" or "gemini"). If the other
+    provider's key is also set, it automatically becomes the backup. If the
+    preferred provider's key is missing but the other one is configured,
+    that one is used — a misconfigured preference never breaks the run.
+    """
+    prefer = env("LLM_PROVIDER", "anthropic").lower()
+    builders: dict[str, Any] = {"anthropic": AnthropicProvider, "gemini": GeminiProvider}
+    order = [prefer] + [name for name in ("anthropic", "gemini") if name != prefer]
+
+    providers: list[LLMProvider] = []
+    for name in order:
+        if name not in builders:
+            log.warning("unknown LLM_PROVIDER %r — skipping", name)
+            continue
+        try:
+            providers.append(builders[name]())
+        except Exception as exc:  # unconfigured or broken — try the next one
+            log.info("provider %s unavailable: %s", name, exc)
+
+    if not providers:
+        raise LLMError(
+            "no LLM provider available — set ANTHROPIC_API_KEY and/or GEMINI_API_KEY"
+        )
+    if len(providers) == 2:
+        log.info(
+            "LLM providers: %s (primary) with %s as automatic backup",
+            providers[0].name, providers[1].name,
+        )
+        return FallbackProvider(providers[0], providers[1])
+    log.info("LLM provider: %s (no backup key configured)", providers[0].name)
+    return providers[0]
