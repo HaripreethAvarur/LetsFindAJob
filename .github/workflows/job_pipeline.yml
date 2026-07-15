@@ -78,6 +78,9 @@ jobs:
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # flash has a far larger free-tier daily quota than pro — right
+          # default for a free-key-only setup. Override via repo variable.
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
           MAX_SCORED_PER_RUN: "40"   # cost safety valve; raise once stable
         run: python main.py
 

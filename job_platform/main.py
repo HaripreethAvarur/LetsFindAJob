@@ -245,10 +245,28 @@ async def run_pipeline(args: argparse.Namespace) -> None:
             )
             to_score = to_score[:max_scored]
 
+        consecutive_failures = 0
         for rec in to_score:
             evaluation = scorer.score_cached(conn, rec)
             if evaluation is None:
+                # Circuit breaker: a burst of consecutive failures usually
+                # means the provider quota/rate limit is exhausted (common on
+                # free-tier keys). Stop wasting retries — unscored listings
+                # stay pending and are scored on the next run automatically.
+                consecutive_failures += 1
+                if consecutive_failures >= 3:
+                    counters["llm_unavailable"] = (
+                        "provider quota/rate limit likely exhausted mid-run; "
+                        "remaining listings stay pending for the next run"
+                    )
+                    log.warning(
+                        "3 consecutive scoring failures — stopping LLM work for "
+                        "this run (%d listings remain pending)",
+                        len(to_score) - to_score.index(rec) - 1,
+                    )
+                    break
                 continue
+            consecutive_failures = 0
             if evaluation.from_cache:
                 counters["llm_cache_hits"] += 1
                 continue
