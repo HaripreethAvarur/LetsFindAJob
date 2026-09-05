@@ -1,0 +1,27 @@
+JOB PIPELINE DIGEST — 2026-09-05 18:18 UTC
+============================================================
+New/changed listings this run : 8
+Total APPLY-verdict listings  : 0
+run_started                   : 2026-09-05T18:15:35+00:00
+sources_succeeded             : careers_direct, ashby, smartrecruiters, lever, greenhouse, workday
+sources_failed                : (none)
+new_or_changed_listings       : 8
+stale_skipped                 : 95
+llm_calls_made                : 0
+llm_calls_skipped_via_cache   : 0
+apply_verdicts_this_run       : 0
+resumes_tailored              : 0
+health_warnings               : (none)
+ACTION NEEDED                 : LLM key missing/invalid: provider quota/rate limit likely exhausted mid-run; remaining listings stay pending for the next run
+
+TOP 5 BY RELEVANCE SCORE
+------------------------------------------------------------
+(nothing scored yet)
+
+FOLLOW-UPS NEEDED
+------------------------------------------------------------
+(none)
+
+FUNNEL
+------------------------------------------------------------
+New         : 5410
