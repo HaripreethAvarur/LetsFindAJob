@@ -1,0 +1,27 @@
+JOB PIPELINE DIGEST — 2026-09-13 04:42 UTC
+============================================================
+New/changed listings this run : 2
+Total APPLY-verdict listings  : 0
+run_started                   : 2026-09-13T04:42:48+00:00
+sources_succeeded             : wellfound, ashby, lever, greenhouse, internshala
+sources_failed                : (none)
+new_or_changed_listings       : 2
+stale_skipped                 : 97
+llm_calls_made                : 0
+llm_calls_skipped_via_cache   : 0
+apply_verdicts_this_run       : 0
+resumes_tailored              : 0
+health_warnings               : (none)
+ACTION NEEDED                 : LLM key missing/invalid: provider quota/rate limit likely exhausted mid-run; remaining listings stay pending for the next run
+
+TOP 5 BY RELEVANCE SCORE
+------------------------------------------------------------
+(nothing scored yet)
+
+FOLLOW-UPS NEEDED
+------------------------------------------------------------
+(none)
+
+FUNNEL
+------------------------------------------------------------
+New         : 5986
